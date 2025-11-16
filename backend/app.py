@@ -73,6 +73,10 @@ app.register_blueprint(auth_bp, url_prefix='/api/auth')
 from routes.admin_routes import admin_bp
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
+# Registrar rutas de mentores
+from routes.mentor_routes import mentor_bp
+app.register_blueprint(mentor_bp, url_prefix='/api/mentor')
+
 @app.route('/')
 def index():
     return {'message': 'API funcionando correctamente'}
