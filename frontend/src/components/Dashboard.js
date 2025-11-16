@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from './UserManagement';
 import BIModule from './BIModule';
+import MyUsers from './MyUsers';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const [activeSection, setActiveSection] = useState('usuarios');
+  
+  // Determinar sección inicial según el rol
+  const getInitialSection = () => {
+    if (user.role === 'mentor') {
+      return 'mis-usuarios';
+    }
+    if (user.role === 'admin') {
+      return 'usuarios';
+    }
+    return 'dashboard';
+  };
+  
+  const [activeSection, setActiveSection] = useState(getInitialSection());
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = () => {
@@ -18,21 +31,36 @@ const Dashboard = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Determinar menú según el rol del usuario
   const menuItems = [
     { id: 'usuarios', label: '👥 Gestión de Usuarios', component: UserManagement, adminOnly: true },
     { id: 'bi', label: '📈 Business Intelligence', component: BIModule, adminOnly: true },
-    { id: 'dashboard', label: '📊 Dashboard', component: null, adminOnly: false },
+    { id: 'mis-usuarios', label: '👥 Mis Usuarios Asignados', component: MyUsers, mentorOnly: true },
+    { id: 'dashboard', label: '📊 Dashboard', component: null, adminOnly: false, mentorOnly: false },
     // Puedes agregar más secciones aquí en el futuro
   ];
 
   const availableMenuItems = menuItems.filter(item => {
+    // Si es solo para admin y el usuario no es admin, excluir
     if (item.adminOnly && user.role !== 'admin') {
+      return false;
+    }
+    // Si es solo para mentor y el usuario no es mentor, excluir
+    if (item.mentorOnly && user.role !== 'mentor') {
       return false;
     }
     return true;
   });
 
-  const currentItem = menuItems.find(item => item.id === activeSection);
+  // Asegurar que la sección activa esté disponible para el rol del usuario
+  useEffect(() => {
+    const isActiveSectionAvailable = availableMenuItems.some(item => item.id === activeSection);
+    if (!isActiveSectionAvailable && availableMenuItems.length > 0) {
+      setActiveSection(availableMenuItems[0].id);
+    }
+  }, [user.role]); // Solo ejecutar cuando cambie el rol
+
+  const currentItem = availableMenuItems.find(item => item.id === activeSection) || menuItems.find(item => item.id === activeSection);
   const CurrentComponent = currentItem?.component;
 
   const renderContent = () => {
