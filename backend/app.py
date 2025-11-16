@@ -10,12 +10,18 @@ load_dotenv()
 # Obtener la ruta del directorio actual
 BASE_DIR = Path(__file__).resolve().parent
 
+# Crear directorio para almacenar archivos subidos
+UPLOAD_FOLDER = BASE_DIR / 'uploads' / 'messages'
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+
 # Cargar variables de entorno desde archivo .env en el directorio backend
 env_path = BASE_DIR / '.env'
 load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'tu-clave-secreta-aqui-cambiar-en-produccion')
+app.config['UPLOAD_FOLDER'] = str(UPLOAD_FOLDER)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB máximo
 
 # Configuración de base de datos desde variables de entorno
 DB_USER = os.getenv('DB_USER', 'postgres')

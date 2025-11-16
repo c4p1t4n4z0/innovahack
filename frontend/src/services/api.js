@@ -128,8 +128,28 @@ export const mentorService = {
     const response = await api.get(`/mentor/messages?mentor_id=${mentorId}&user_id=${userId}`);
     return response.data;
   },
-  sendMessage: async (mentorId, userId, content) => {
-    const response = await api.post(`/mentor/messages`, { mentor_id: mentorId, user_id: userId, content });
+  sendMessage: async (mentorId, userId, content, file = null) => {
+    const formData = new FormData();
+    formData.append('mentor_id', mentorId);
+    formData.append('user_id', userId);
+    if (content) {
+      formData.append('content', content);
+    }
+    if (file) {
+      formData.append('file', file);
+    }
+    
+    const response = await api.post(`/mentor/messages`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  downloadFile: async (messageId, mentorId) => {
+    const response = await api.get(`/mentor/messages/files/${messageId}?mentor_id=${mentorId}`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
 };
@@ -163,8 +183,27 @@ export const userService = {
     const response = await api.get(`/user/messages/${userId}`);
     return response.data;
   },
-  sendMessage: async (userId, content) => {
-    const response = await api.post(`/user/messages`, { user_id: userId, content });
+  sendMessage: async (userId, content, file = null) => {
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    if (content) {
+      formData.append('content', content);
+    }
+    if (file) {
+      formData.append('file', file);
+    }
+    
+    const response = await api.post(`/user/messages`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  downloadFile: async (messageId, userId) => {
+    const response = await api.get(`/user/messages/files/${messageId}?user_id=${userId}`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
   markMessagesRead: async (userId) => {

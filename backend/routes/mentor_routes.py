@@ -2,7 +2,11 @@
 Rutas para mentores
 Los mentores solo pueden ver y gestionar sus usuarios asignados
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file, current_app
+import os
+from werkzeug.utils import secure_filename
+from pathlib import Path
+import uuid
 from models.user import User
 from models.mentor_invitation import MentorInvitation
 from models.mentor_message import MentorMessage
@@ -183,17 +187,28 @@ def list_messages_for_mentor():
     except Exception as e:
         return jsonify({'error': f'Error del servidor: {str(e)}'}), 500
 
+def allowed_file(filename):
+    """Verifica si el archivo está permitido"""
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx', 'odt'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @mentor_bp.route('/messages', methods=['POST'])
 # @mentor_required
 def send_message_as_mentor():
-    """Envía mensaje del mentor al usuario"""
-    data = request.get_json() or {}
-    mentor_id = data.get('mentor_id')
-    user_id = data.get('user_id')
-    content = (data.get('content') or '').strip()
-    if not mentor_id or not user_id or not content:
-        return jsonify({'error': 'mentor_id, user_id y content son requeridos'}), 400
+    """Envía mensaje del mentor al usuario (puede incluir archivo)"""
     try:
+        mentor_id = request.form.get('mentor_id')
+        user_id = request.form.get('user_id')
+        content = (request.form.get('content') or '').strip()
+        file = request.files.get('file')
+        
+        if not mentor_id or not user_id:
+            return jsonify({'error': 'mentor_id y user_id son requeridos'}), 400
+        
+        # Debe haber contenido o archivo
+        if not content and not file:
+            return jsonify({'error': 'Debes enviar un mensaje de texto o un archivo'}), 400
+        
         mentor = User.query.get(int(mentor_id))
         if not mentor or mentor.role != 'mentor':
             return jsonify({'error': 'Mentor no válido'}), 403
@@ -202,17 +217,97 @@ def send_message_as_mentor():
             return jsonify({'error': 'Usuario no encontrado'}), 404
         if user.mentor_id != mentor.id:
             return jsonify({'error': 'El usuario no está asignado a este mentor'}), 403
+        
+        # Procesar archivo si existe
+        file_name = None
+        file_path = None
+        file_type = None
+        file_size = None
+        
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                return jsonify({'error': 'Tipo de archivo no permitido. Solo se permiten: txt, pdf, doc, docx, odt'}), 400
+            
+            # Generar nombre único para el archivo
+            original_filename = secure_filename(file.filename)
+            file_ext = original_filename.rsplit('.', 1)[1].lower()
+            unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
+            
+            # Crear subdirectorio por mensaje si es necesario
+            upload_folder = Path(current_app.config['UPLOAD_FOLDER'])
+            file_path_obj = upload_folder / unique_filename
+            
+            # Guardar archivo
+            file.save(str(file_path_obj))
+            
+            file_name = original_filename
+            # Guardar ruta relativa desde BASE_DIR para poder reconstruirla
+            file_path = f"uploads/messages/{unique_filename}"
+            file_type = file.content_type or f'application/{file_ext}'
+            file_size = file_path_obj.stat().st_size
+        
         msg = MentorMessage(
             user_id=user.id,
             mentor_id=mentor.id,
             sender_id=mentor.id,
-            content=content
+            content=content if content else None,
+            file_name=file_name,
+            file_path=file_path,
+            file_type=file_type,
+            file_size=file_size
         )
         db.session.add(msg)
         db.session.commit()
         return jsonify({'message': 'Enviado', 'data': msg.to_dict()}), 201
     except Exception as e:
         db.session.rollback()
+        # Limpiar archivo si hubo error
+        if file_path and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
+        return jsonify({'error': f'Error del servidor: {str(e)}'}), 500
+
+@mentor_bp.route('/messages/files/<int:message_id>', methods=['GET'])
+def download_file_mentor(message_id):
+    """Descarga un archivo adjunto de un mensaje (para mentores)"""
+    try:
+        msg = MentorMessage.query.get(message_id)
+        if not msg:
+            return jsonify({'error': 'Mensaje no encontrado'}), 404
+        
+        if not msg.file_path:
+            return jsonify({'error': 'Este mensaje no tiene archivo adjunto'}), 404
+        
+        # Verificar que el mentor tiene acceso a este mensaje
+        mentor_id = request.args.get('mentor_id')
+        if mentor_id:
+            mentor = User.query.get(int(mentor_id))
+            if mentor and mentor.role == 'mentor' and msg.mentor_id == mentor.id:
+                # Construir ruta completa al archivo
+                # msg.file_path se guarda como "uploads/messages/nombre_archivo.extension"
+                upload_folder = Path(current_app.config['UPLOAD_FOLDER'])
+                # Si la ruta es relativa (empieza con "uploads/"), construir desde BASE_DIR
+                if msg.file_path.startswith('uploads/'):
+                    base_dir = Path(current_app.root_path).parent
+                    file_path_full = base_dir / msg.file_path
+                else:
+                    # Si es solo el nombre del archivo, buscarlo en upload_folder
+                    file_path_full = upload_folder / msg.file_path.split('/')[-1].split('\\')[-1]
+                
+                if not file_path_full.exists():
+                    return jsonify({'error': 'Archivo no encontrado en el servidor'}), 404
+                
+                return send_file(
+                    str(file_path_full),
+                    as_attachment=True,
+                    download_name=msg.file_name or 'archivo',
+                    mimetype=msg.file_type or 'application/octet-stream'
+                )
+        
+        return jsonify({'error': 'No tienes permiso para acceder a este archivo'}), 403
+    except Exception as e:
         return jsonify({'error': f'Error del servidor: {str(e)}'}), 500
 
 @mentor_bp.route('/conversations', methods=['GET'])
