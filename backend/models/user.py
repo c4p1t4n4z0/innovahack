@@ -11,6 +11,10 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default='user', nullable=False)  # 'admin', 'mentor' o 'user'
     mentor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Mentor asignado
+    # Emprendimiento (un usuario puede tener un solo emprendimiento)
+    business_name = db.Column(db.String(150), nullable=True)
+    business_category = db.Column(db.String(80), nullable=True)
+    business_description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relaciones
@@ -52,6 +56,11 @@ class User(db.Model):
             'role': self.role,
             'mentor_id': self.mentor_id,
             'mentor': mentor_dict,
+            'business': {
+                'name': self.business_name,
+                'category': self.business_category,
+                'description': self.business_description
+            },
             'assigned_users_count': len(self.assigned_users) if self.is_mentor() else None,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
