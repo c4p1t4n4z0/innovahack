@@ -41,5 +41,59 @@ export const authService = {
   },
 };
 
+export const adminService = {
+  getAllUsers: async () => {
+    const response = await api.get('/admin/users');
+    return response.data;
+  },
+  
+  getUserById: async (userId) => {
+    const response = await api.get(`/admin/users/${userId}`);
+    return response.data;
+  },
+  
+  createUser: async (userData) => {
+    const response = await api.post('/admin/users', userData);
+    return response.data;
+  },
+  
+  updateUser: async (userId, userData) => {
+    const response = await api.put(`/admin/users/${userId}`, userData);
+    return response.data;
+  },
+  
+  deleteUser: async (userId) => {
+    const response = await api.delete(`/admin/users/${userId}`);
+    return response.data;
+  },
+  
+  getAllMentors: async () => {
+    const response = await api.get('/admin/mentors');
+    return response.data;
+  },
+  
+  getMentorUsers: async (mentorId) => {
+    const response = await api.get(`/admin/mentors/${mentorId}/users`);
+    return response.data;
+  },
+  
+  assignUserToMentor: async (userId, mentorId) => {
+    const response = await api.post(`/admin/users/${userId}/assign-mentor`, { mentor_id: mentorId });
+    return response.data;
+  },
+};
+
+export const biService = {
+  getStatistics: async () => {
+    const response = await api.get('/admin/bi/statistics');
+    return response.data;
+  },
+  
+  getMentorPerformance: async () => {
+    const response = await api.get('/admin/bi/mentor-performance');
+    return response.data;
+  },
+};
+
 export default api;
 

@@ -23,8 +23,8 @@ class AuthController:
         if not re.match(email_regex, email):
             return {'error': 'Email inválido'}, 400
         
-        # Validar role (solo 'admin' o 'user')
-        if role not in ['admin', 'user']:
+        # Validar role (solo 'admin', 'mentor' o 'user')
+        if role not in ['admin', 'mentor', 'user']:
             role = 'user'  # Por defecto user si el role no es válido
         
         # Verificar si el usuario ya existe
