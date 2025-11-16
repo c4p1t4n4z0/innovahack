@@ -105,4 +105,70 @@ REQUISITOS DEL PROGRAMA:
     except Exception as e:
         return jsonify({'error': f'Error del servidor: {str(e)}'}), 500
 
+@ai_bp.route('/ai/interpret-simulator', methods=['POST'])
+def interpret_simulator():
+    """
+    Interpreta los resultados de un simulador de crédito usando IA.
+    Recibe los datos del simulador y devuelve una explicación en lenguaje simple.
+    """
+    try:
+        data = request.get_json() or {}
+        
+        # Datos del préstamo
+        monto = data.get('monto', 0)
+        plazo = data.get('plazo', 0)
+        tasa_anual = data.get('tasaAnual', 0)
+        tipo_cuota = data.get('tipoCuota', 'fija')
+        
+        # Resultados calculados
+        cuota_mensual = data.get('cuotaMensual', 0)
+        intereses_totales = data.get('interesesTotales', 0)
+        costo_total = data.get('costoTotal', 0)
+        
+        if not monto or not plazo or not tasa_anual:
+            return jsonify({'error': 'Datos incompletos del simulador'}), 400
+        
+        # Crear el prompt para la IA
+        prompt = f"""Eres "Mi Mentora IA", una mentora virtual especializada en ayudar emprendedoras a entender sus finanzas.
+
+Necesitas explicar los resultados de una simulación de crédito en lenguaje simple y fácil de entender, como si la persona no tuviera conocimientos financieros.
+
+Datos del préstamo:
+- Monto solicitado: Bs {monto:,.2f}
+- Plazo: {plazo} meses ({(plazo / 12):.1f} años)
+- Tasa de interés anual: {tasa_anual}%
+- Tipo de cuota: {'Cuota fija (mismo monto cada mes)' if tipo_cuota == 'fija' else 'Cuota variable (disminuye cada mes)'}
+
+Resultados calculados:
+- Cuota mensual: Bs {cuota_mensual:,.2f}
+- Intereses totales a pagar: Bs {intereses_totales:,.2f}
+- Costo total del crédito (capital + intereses): Bs {costo_total:,.2f}
+
+Por favor, explica estos números de manera clara y amigable, cubriendo:
+1. ¿Cuánto pagará cada mes? (explica de manera simple)
+2. ¿Cuánto pagará en total por el préstamo?
+3. ¿Cuánto son los intereses en términos simples? (usa analogías si es necesario)
+4. ¿Es un buen préstamo o debería buscar otras opciones? (evalúa la tasa de interés)
+5. Consejos prácticos y útiles para manejar este préstamo.
+
+Usa un tono amigable, como si fueras una mentora explicándole a una amiga. Evita términos técnicos complicados. Si necesitas usar un término financiero, explícalo primero.
+
+Formatea tu respuesta con:
+- Títulos en negrita usando **texto**
+- Párrafos claros y separados
+- Listas numeradas o con viñetas
+- Destacar números importantes en negrita"""
+
+        # Llamar a la IA
+        interpretation = call_gemini(prompt)
+        
+        return jsonify({
+            'interpretation': interpretation,
+            'message': interpretation,
+            'response': interpretation
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Error del servidor: {str(e)}'}), 500
+
 

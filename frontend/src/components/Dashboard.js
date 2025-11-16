@@ -8,6 +8,8 @@ import Emprendedoras from './Emprendedoras';
 import AIMentor from './AIMentor';
 import ProfileModal from './ProfileModal';
 import CreditSimulator from './CreditSimulator';
+import SimulationHistory from './SimulationHistory';
+import ViabilityHistory from './ViabilityHistory';
 import './Dashboard.css';
 import { userService } from '../services/api';
 
@@ -76,6 +78,34 @@ const Dashboard = () => {
     handleMarkRead();
   }, [activeSection, user.role, userUnread, user.id]);
 
+  // Escuchar eventos personalizados para navegar entre secciones
+  useEffect(() => {
+    const handleNavigateToSimulator = (event) => {
+      if (event.detail?.section === 'simulador') {
+        // Pequeño delay para asegurar que los datos se guarden en localStorage
+        setTimeout(() => {
+          setActiveSection('simulador');
+        }, 100);
+      }
+    };
+    
+    const handleNavigateToViability = (event) => {
+      if (event.detail?.section === 'mi-mentora-ia') {
+        setTimeout(() => {
+          setActiveSection('mi-mentora-ia');
+        }, 100);
+      }
+    };
+    
+    window.addEventListener('navigateToSimulator', handleNavigateToSimulator);
+    window.addEventListener('navigateToViability', handleNavigateToViability);
+    
+    return () => {
+      window.removeEventListener('navigateToSimulator', handleNavigateToSimulator);
+      window.removeEventListener('navigateToViability', handleNavigateToViability);
+    };
+  }, []);
+
   // Determinar menú según el rol del usuario
   const menuItems = [
     { id: 'usuarios', label: '👥 Gestión de Emprendedores', component: UserManagement, adminOnly: true },
@@ -87,6 +117,8 @@ const Dashboard = () => {
     ...(user.role === 'user' ? [{ id: 'mi-mentora', label: '🤝 Mi Mentora', component: MyMentor, adminOnly: false, mentorOnly: false }] : []),
     ...(user.role === 'user' ? [{ id: 'mi-mentora-ia', label: '🤖 Mi Mentora IA', component: AIMentor, adminOnly: false, mentorOnly: false }] : []),
     ...(user.role === 'user' ? [{ id: 'simulador', label: '💳 Simulador de Crédito', component: CreditSimulator, adminOnly: false, mentorOnly: false }] : []),
+    ...(user.role === 'user' ? [{ id: 'historial-simulaciones', label: '📜 Historial Simulaciones', component: SimulationHistory, adminOnly: false, mentorOnly: false }] : []),
+    ...(user.role === 'user' ? [{ id: 'historial-viabilidad', label: '📊 Historial Viabilidad', component: ViabilityHistory, adminOnly: false, mentorOnly: false }] : []),
     { id: 'dashboard', label: '📊 Dashboard', component: null, adminOnly: false, mentorOnly: false },
     // Puedes agregar más secciones aquí en el futuro
   ];
