@@ -91,7 +91,10 @@
   padding: 16px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 24px;
-  overflow-x: auto;
+}
+
+.sales-table-container > div:first-child {
+  margin-bottom: 16px;
 }
 
 .sales-table-container h3 {
