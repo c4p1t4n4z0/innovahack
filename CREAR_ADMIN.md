@@ -44,6 +44,7 @@ with app.app_context():
     # Crear usuario administrador
     admin = User(
         username='admin',
+        username='admin',
         email='admin@proyecto.com',
         password='admin123',
         role='admin'

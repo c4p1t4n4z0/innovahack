@@ -4,13 +4,13 @@ import sys
 
 try:
     print("Intentando conectar a PostgreSQL...")
-    print(f"Host: localhost, Port: 5433, User: postgres, DB: proyecto_db")
+    print(f"Host: localhost, Port: 5432, User: postgres, DB: innovadb")
     conn = psycopg2.connect(
         host='localhost',
-        port=5433,
+        port=5432,
         user='postgres',
-        password='postgres123',
-        database='proyecto_db',
+        password='root',
+        database='innovadb',
         connect_timeout=5
     )
     print("OK - Conexion exitosa!")
