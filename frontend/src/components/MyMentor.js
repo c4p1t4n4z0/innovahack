@@ -7,10 +7,12 @@ const MyMentor = () => {
   const [mentor, setMentor] = useState(user.mentor || null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const endRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [view, setView] = useState('messages'); // 'messages' | 'program'
   const [industry, setIndustry] = useState(user?.business?.category || user?.business?.name || '');
   const [program, setProgram] = useState(null);
@@ -44,18 +46,83 @@ const MyMentor = () => {
 
   const send = async (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() && !selectedFile) return;
     setLoading(true); setError(''); setSuccess('');
     try {
-      await userService.sendMessage(user.id, text.trim());
+      await userService.sendMessage(user.id, text.trim() || null, selectedFile);
       setText('');
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       const conv = await userService.listMessages(user.id);
       setMessages(conv.messages || []);
+      setSuccess('Mensaje enviado');
+      setTimeout(() => setSuccess(''), 2000);
     } catch (e) {
       setError(e.response?.data?.error || 'No se pudo enviar el mensaje');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      const allowedTypes = ['text/plain', 'application/pdf', 'application/msword', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.oasis.opendocument.text'];
+      const allowedExtensions = ['txt', 'pdf', 'doc', 'docx', 'odt'];
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      
+      if (!allowedExtensions.includes(fileExt)) {
+        setError('Tipo de archivo no permitido. Solo se permiten: txt, pdf, doc, docx, odt');
+        e.target.value = '';
+        return;
+      }
+      
+      // Validar tamaño (16 MB máximo)
+      if (file.size > 16 * 1024 * 1024) {
+        setError('El archivo es demasiado grande. Máximo 16 MB');
+        e.target.value = '';
+        return;
+      }
+      
+      setSelectedFile(file);
+      setError('');
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const downloadFile = async (message) => {
+    try {
+      const blob = await userService.downloadFile(message.id, user.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = message.file_name || 'archivo';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      setError(e.response?.data?.error || 'No se pudo descargar el archivo');
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
   const generateProgram = () => {
@@ -215,7 +282,36 @@ const MyMentor = () => {
               const mine = msg.sender_id === user.id;
               return (
                 <div key={msg.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'}`}>
-                  <div className="bubble-content">{msg.content}</div>
+                  {msg.content && (
+                    <div className="bubble-content">{msg.content}</div>
+                  )}
+                  {msg.file_name && (
+                    <div className="file-attachment" style={{
+                      marginTop: msg.content ? '8px' : '0',
+                      padding: '8px',
+                      backgroundColor: mine ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                    }} onClick={() => downloadFile(msg)}>
+                      <span style={{ fontSize: '20px' }}>
+                        {msg.file_type?.includes('pdf') ? '📄' : 
+                         msg.file_type?.includes('word') || msg.file_name?.endsWith('.docx') || msg.file_name?.endsWith('.doc') ? '📝' : 
+                         msg.file_name?.endsWith('.txt') ? '📃' : '📎'}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: '500', fontSize: '14px' }}>{msg.file_name}</div>
+                        {msg.file_size && (
+                          <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                            {formatFileSize(msg.file_size)}
+                          </div>
+                        )}
+                      </div>
+                      <span style={{ fontSize: '12px', opacity: 0.8 }}>⬇️</span>
+                    </div>
+                  )}
                   <div className="bubble-meta">{new Date(msg.created_at).toLocaleString()}</div>
                 </div>
               );
@@ -223,14 +319,88 @@ const MyMentor = () => {
             <div ref={endRef} />
           </div>
           <form className="chat-input" onSubmit={send}>
-            <input
-              placeholder="Escribe un mensaje para tu mentora..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-            <button type="submit" className="btn-submit" disabled={loading || !text.trim()}>
-              Enviar
-            </button>
+            {selectedFile && (
+              <div style={{
+                padding: '8px 12px',
+                backgroundColor: '#e3f2fd',
+                borderRadius: '6px',
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                  <span style={{ fontSize: '20px' }}>
+                    {selectedFile.name.endsWith('.pdf') ? '📄' : 
+                     selectedFile.name.endsWith('.docx') || selectedFile.name.endsWith('.doc') ? '📝' : 
+                     selectedFile.name.endsWith('.txt') ? '📃' : '📎'}
+                  </span>
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>{selectedFile.name}</span>
+                  <span style={{ fontSize: '11px', opacity: 0.7 }}>
+                    ({formatFileSize(selectedFile.size)})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    padding: '4px',
+                    opacity: 0.7,
+                  }}
+                  title="Quitar archivo"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                accept=".txt,.pdf,.doc,.docx,.odt"
+                style={{ display: 'none' }}
+                id="file-input"
+              />
+              <label
+                htmlFor="file-input"
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: '#f5f5f5',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '40px',
+                }}
+                title="Adjuntar archivo (txt, pdf, doc, docx, odt)"
+              >
+                📎
+              </label>
+              <input
+                placeholder="Escribe un mensaje para tu mentora..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <button type="submit" className="btn-submit" disabled={loading || (!text.trim() && !selectedFile)}>
+                {loading ? 'Enviando...' : 'Enviar'}
+              </button>
+            </div>
           </form>
         </div>
       )}
