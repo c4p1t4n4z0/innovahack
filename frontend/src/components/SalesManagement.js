@@ -154,7 +154,11 @@ const SalesManagement = () => {
       }
 
       if (salesRes.sales) {
+        console.log(`[SalesManagement] Cargadas ${salesRes.sales.length} ventas para ${monthYear}:`, salesRes.sales);
         setSales(salesRes.sales);
+      } else {
+        console.log('[SalesManagement] No se recibieron ventas del servidor');
+        setSales([]);
       }
 
       if (reportRes.statistics) {
@@ -229,7 +233,10 @@ const SalesManagement = () => {
       await salesService.deleteSale(user.id, saleId);
       setSuccess('Venta eliminada correctamente');
       setTimeout(() => setSuccess(''), 3000);
-      loadData();
+      // Recargar datos después de eliminar
+      setTimeout(() => {
+        loadData();
+      }, 200);
     } catch (e) {
       setError(e.response?.data?.error || 'Error al eliminar venta');
     } finally {
@@ -500,54 +507,72 @@ const SalesManagement = () => {
 
           {/* Tabla de ventas */}
           <div className="sales-table-container">
-            <h3>Ventas Registradas</h3>
-            <table className="sales-table">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Producto</th>
-                  <th>Unidades</th>
-                  <th>Precio/Unidad</th>
-                  <th>Costo Variable/Unidad</th>
-                  <th>Ingresos</th>
-                  <th>Utilidad Bruta</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sales.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="no-sales">No hay ventas registradas para este mes</td>
-                  </tr>
-                ) : (
-                  sales.map((sale) => (
-                    <tr key={sale.id}>
-                      <td>{new Date(sale.sale_date).toLocaleDateString('es-ES')}</td>
-                      <td>{sale.product_name || '-'}</td>
-                      <td>{sale.units_sold}</td>
-                      <td>Bs {sale.price_per_unit.toFixed(2)}</td>
-                      <td>Bs {sale.variable_cost_per_unit.toFixed(2)}</td>
-                      <td>Bs {sale.revenue.toFixed(2)}</td>
-                      <td>Bs {sale.gross_profit.toFixed(2)}</td>
-                      <td>
-                        <button
-                          className="btn-edit"
-                          onClick={() => handleEditSale(sale)}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDeleteSale(sale.id)}
-                        >
-                          🗑️
-                        </button>
-                      </td>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3>Ventas Registradas</h3>
+              <div style={{ fontSize: '14px', color: '#666' }}>
+                Total: <strong>{sales.length}</strong> {sales.length === 1 ? 'venta' : 'ventas'} en {monthYear}
+              </div>
+            </div>
+            {sales.length > 0 ? (
+              <div style={{ overflowX: 'auto' }}>
+                <table className="sales-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Fecha</th>
+                      <th>Producto</th>
+                      <th>Unidades</th>
+                      <th>Precio/Unidad</th>
+                      <th>Costo Variable/Unidad</th>
+                      <th>Ingresos</th>
+                      <th>Utilidad Bruta</th>
+                      <th>Acciones</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {sales.map((sale, index) => (
+                      <tr key={sale.id}>
+                        <td style={{ fontWeight: '500', color: '#666' }}>{index + 1}</td>
+                        <td>{new Date(sale.sale_date).toLocaleDateString('es-ES', { 
+                          day: '2-digit', 
+                          month: '2-digit', 
+                          year: 'numeric' 
+                        })}</td>
+                        <td>{sale.product_name || '-'}</td>
+                        <td style={{ textAlign: 'center', fontWeight: '500' }}>{sale.units_sold}</td>
+                        <td>Bs {parseFloat(sale.price_per_unit).toFixed(2)}</td>
+                        <td>Bs {parseFloat(sale.variable_cost_per_unit).toFixed(2)}</td>
+                        <td style={{ fontWeight: '600', color: '#2e7d32' }}>Bs {parseFloat(sale.revenue || 0).toFixed(2)}</td>
+                        <td style={{ fontWeight: '600', color: '#1976d2' }}>Bs {parseFloat(sale.gross_profit || 0).toFixed(2)}</td>
+                        <td>
+                          <button
+                            className="btn-edit"
+                            onClick={() => handleEditSale(sale)}
+                            title="Editar venta"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn-delete"
+                            onClick={() => handleDeleteSale(sale.id)}
+                            title="Eliminar venta"
+                          >
+                            🗑️
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="no-sales" style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
+                <p>No hay ventas registradas para el mes {monthYear}</p>
+                <p style={{ fontSize: '14px', marginTop: '8px' }}>
+                  Haz clic en "➕ Agregar Venta" para registrar tu primera venta
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Resumen de estadísticas */}
