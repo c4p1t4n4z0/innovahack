@@ -95,5 +95,17 @@ export const biService = {
   },
 };
 
+export const mentorService = {
+  getMyUsers: async (mentorId) => {
+    const response = await api.get(`/mentor/my-users?mentor_id=${mentorId}`);
+    return response.data;
+  },
+  
+  getMyUser: async (mentorId, userId) => {
+    const response = await api.get(`/mentor/my-users/${userId}?mentor_id=${mentorId}`);
+    return response.data;
+  },
+};
+
 export default api;
 
