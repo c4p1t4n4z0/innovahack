@@ -1,0 +1,15 @@
+# Configuración de Base de Datos PostgreSQL
+# Copiar estos valores y actualizar en app.py
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=proyecto_db
+DB_USER=postgres
+DB_PASSWORD=tu_password_aqui
+
+# Secret Key para Flask
+SECRET_KEY=tu-clave-secreta-aqui-cambiar-en-produccion
+
+# CORS Origins
+FRONTEND_URL=http://localhost:3000
+
