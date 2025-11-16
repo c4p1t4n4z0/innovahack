@@ -7,6 +7,7 @@ import MyMentor from './MyMentor';
 import Emprendedoras from './Emprendedoras';
 import AIMentor from './AIMentor';
 import ProfileModal from './ProfileModal';
+import CreditSimulator from './CreditSimulator';
 import './Dashboard.css';
 import { userService } from '../services/api';
 
@@ -77,14 +78,15 @@ const Dashboard = () => {
 
   // Determinar menú según el rol del usuario
   const menuItems = [
-    { id: 'usuarios', label: '👥 Gestión de Usuarios', component: UserManagement, adminOnly: true },
+    { id: 'usuarios', label: '👥 Gestión de Emprendedores', component: UserManagement, adminOnly: true },
     { id: 'bi', label: '📈 Business Intelligence', component: BIModule, adminOnly: true },
-    { id: 'mis-usuarios', label: '👥 Mis Usuarios Asignados', component: MyUsers, mentorOnly: true },
+    { id: 'mis-usuarios', label: '👥 Mis Emprendedores Asignados', component: MyUsers, mentorOnly: true },
     { id: 'invitaciones', label: '✉️ Invitaciones', component: MentorInvitations, mentorOnly: true },
     { id: 'emprendedoras', label: '👩‍💼 Emprendedoras', component: Emprendedoras, mentorOnly: true },
-    // Módulo del usuario: Mi Mentora
+    // Módulo del usuario: Mi Mentora y Simulador de Crédito (solo para emprendedores)
     ...(user.role === 'user' ? [{ id: 'mi-mentora', label: '🤝 Mi Mentora', component: MyMentor, adminOnly: false, mentorOnly: false }] : []),
     ...(user.role === 'user' ? [{ id: 'mi-mentora-ia', label: '🤖 Mi Mentora IA', component: AIMentor, adminOnly: false, mentorOnly: false }] : []),
+    ...(user.role === 'user' ? [{ id: 'simulador', label: '💳 Simulador de Crédito', component: CreditSimulator, adminOnly: false, mentorOnly: false }] : []),
     { id: 'dashboard', label: '📊 Dashboard', component: null, adminOnly: false, mentorOnly: false },
     // Puedes agregar más secciones aquí en el futuro
   ];
