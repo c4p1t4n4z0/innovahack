@@ -59,7 +59,7 @@ const Login = () => {
         if (response.error) {
           setError(response.error);
         } else {
-          setSuccess('Usuario registrado correctamente. Ahora puedes iniciar sesión.');
+          setSuccess('Emprendedor registrado correctamente. Ahora puedes iniciar sesión.');
           setIsRegister(false);
           setFormData({
             username: '',
@@ -71,7 +71,7 @@ const Login = () => {
       } else {
         // Login
         if (!formData.username || !formData.password) {
-          setError('Usuario y contraseña son obligatorios');
+          setError('Nombre de usuario y contraseña son obligatorios');
           setLoading(false);
           return;
         }

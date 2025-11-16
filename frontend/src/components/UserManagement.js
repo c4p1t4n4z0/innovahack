@@ -36,7 +36,7 @@ const UserManagement = () => {
         setUsers(response.users || []);
       }
     } catch (err) {
-      setError('Error al cargar usuarios. Verifica que el backend esté corriendo.');
+      setError('Error al cargar emprendedores. Verifica que el backend esté corriendo.');
     } finally {
       setLoading(false);
     }
@@ -94,21 +94,21 @@ const UserManagement = () => {
         if (response.error) {
           setError(response.error);
         } else {
-          setSuccess('Usuario actualizado correctamente');
+          setSuccess('Emprendedor actualizado correctamente');
           setShowModal(false);
           loadUsers();
         }
       } else {
         // Crear usuario
         if (!formData.password) {
-          setError('La contraseña es obligatoria para crear usuarios');
+          setError('La contraseña es obligatoria para crear emprendedores');
           return;
         }
         const response = await adminService.createUser(formData);
         if (response.error) {
           setError(response.error);
         } else {
-          setSuccess('Usuario creado correctamente');
+          setSuccess('Emprendedor creado correctamente');
           setShowModal(false);
           loadUsers();
         }
@@ -119,7 +119,7 @@ const UserManagement = () => {
   };
 
   const handleDelete = async (userId, username) => {
-    if (!window.confirm(`¿Estás seguro de eliminar al usuario "${username}"?`)) {
+    if (!window.confirm(`¿Estás seguro de eliminar al emprendedor "${username}"?`)) {
       return;
     }
     
@@ -129,11 +129,11 @@ const UserManagement = () => {
       if (response.error) {
         setError(response.error);
       } else {
-        setSuccess(response.message || 'Usuario eliminado correctamente');
+        setSuccess(response.message || 'Emprendedor eliminado correctamente');
         loadUsers();
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al eliminar usuario');
+      setError(err.response?.data?.error || 'Error al eliminar emprendedor');
     }
   };
 
@@ -179,15 +179,15 @@ const UserManagement = () => {
   };
 
   if (loading) {
-    return <div className="loading">Cargando usuarios...</div>;
+    return <div className="loading">Cargando emprendedores...</div>;
   }
 
   return (
     <div className="user-management">
       <div className="management-header">
-        <h2>Gestión de Usuarios</h2>
+        <h2>Gestión de Emprendedores</h2>
         <button onClick={handleCreate} className="btn-primary">
-          + Crear Usuario
+          + Crear Emprendedor
         </button>
       </div>
 
@@ -199,7 +199,7 @@ const UserManagement = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Usuario</th>
+              <th>Emprendedor</th>
               <th>Email</th>
               <th>Rol</th>
               <th>Mentor</th>
@@ -211,7 +211,7 @@ const UserManagement = () => {
             {users.length === 0 ? (
               <tr>
                 <td colSpan="7" className="no-users">
-                  No hay usuarios registrados
+                  No hay emprendedores registrados
                 </td>
               </tr>
             ) : (
@@ -269,12 +269,12 @@ const UserManagement = () => {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingUser ? 'Editar Usuario' : 'Crear Usuario'}</h3>
+              <h3>{editingUser ? 'Editar Emprendedor' : 'Crear Emprendedor'}</h3>
               <button onClick={closeModal} className="btn-close">×</button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="username">Usuario *</label>
+                <label htmlFor="username">Emprendedor *</label>
                 <input
                   type="text"
                   id="username"
@@ -321,7 +321,7 @@ const UserManagement = () => {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="user">Usuario</option>
+                  <option value="user">Emprendedor</option>
                   <option value="mentor">Mentor</option>
                   <option value="admin">Administrador</option>
                 </select>
@@ -351,7 +351,7 @@ const UserManagement = () => {
             </div>
             <form onSubmit={handleAssignSubmit}>
               <div className="form-group">
-                <label htmlFor="user">Usuario</label>
+                <label htmlFor="user">Emprendedor</label>
                 <input
                   type="text"
                   id="user"
@@ -370,7 +370,7 @@ const UserManagement = () => {
                   <option value="">Sin mentor</option>
                   {mentors.map((mentor) => (
                     <option key={mentor.id} value={mentor.id}>
-                      {mentor.username} ({mentor.assigned_users_count || 0} usuarios)
+                      {mentor.username} ({mentor.assigned_users_count || 0} emprendedores)
                     </option>
                   ))}
                 </select>

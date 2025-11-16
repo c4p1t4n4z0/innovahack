@@ -86,7 +86,7 @@ const BIModule = () => {
         <div className="metric-card">
           <div className="metric-icon">👥</div>
           <div className="metric-info">
-            <h3>Total Usuarios</h3>
+            <h3>Total Emprendedores</h3>
             <p className="metric-value">{overview.total_users}</p>
           </div>
         </div>
@@ -107,7 +107,7 @@ const BIModule = () => {
         <div className="metric-card">
           <div className="metric-icon">📊</div>
           <div className="metric-info">
-            <h3>Usuarios Regulares</h3>
+            <h3>Emprendedores Regulares</h3>
             <p className="metric-value">{overview.total_users_role}</p>
           </div>
         </div>
@@ -175,7 +175,7 @@ const BIModule = () => {
         {/* Usuarios por Mentor */}
         {mentor_breakdown && mentor_breakdown.length > 0 && (
           <div className="chart-card">
-            <h3>Usuarios por Mentor</h3>
+            <h3>Emprendedores por Mentor</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={mentor_breakdown}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -192,7 +192,7 @@ const BIModule = () => {
         {/* Usuarios Creados por Mes */}
         {monthly_users && monthly_users.length > 0 && (
           <div className="chart-card">
-            <h3>Usuarios Creados (Últimos 6 Meses)</h3>
+            <h3>Emprendedores Creados (Últimos 6 Meses)</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={monthly_users}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -217,7 +217,7 @@ const BIModule = () => {
                 <tr>
                   <th>Mentor</th>
                   <th>Email</th>
-                  <th>Usuarios Asignados</th>
+                  <th>Emprendedores Asignados</th>
                   <th>Rendimiento</th>
                 </tr>
               </thead>
