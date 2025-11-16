@@ -33,9 +33,9 @@ const Dashboard = () => {
 
   // Determinar menú según el rol del usuario
   const menuItems = [
-    { id: 'usuarios', label: '👥 Gestión de Usuarios', component: UserManagement, adminOnly: true },
+    { id: 'usuarios', label: '👥 Gestión de Emprendedores', component: UserManagement, adminOnly: true },
     { id: 'bi', label: '📈 Business Intelligence', component: BIModule, adminOnly: true },
-    { id: 'mis-usuarios', label: '👥 Mis Usuarios Asignados', component: MyUsers, mentorOnly: true },
+    { id: 'mis-usuarios', label: '👥 Mis Emprendedores Asignados', component: MyUsers, mentorOnly: true },
     { id: 'dashboard', label: '📊 Dashboard', component: null, adminOnly: false, mentorOnly: false },
     // Puedes agregar más secciones aquí en el futuro
   ];

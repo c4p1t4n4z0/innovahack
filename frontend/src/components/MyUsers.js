@@ -27,7 +27,7 @@ const MyUsers = () => {
         setUsers(response.users || []);
       }
     } catch (err) {
-      setError('Error al cargar usuarios. Verifica que el backend esté corriendo.');
+      setError('Error al cargar emprendedores. Verifica que el backend esté corriendo.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -44,7 +44,7 @@ const MyUsers = () => {
         setShowModal(true);
       }
     } catch (err) {
-      setError('Error al cargar información del usuario.');
+      setError('Error al cargar información del emprendedor.');
       console.error(err);
     }
   };
@@ -55,7 +55,7 @@ const MyUsers = () => {
   };
 
   if (loading) {
-    return <div className="my-users-loading">Cargando usuarios asignados...</div>;
+    return <div className="my-users-loading">Cargando emprendedores asignados...</div>;
   }
 
   if (error) {
@@ -72,7 +72,7 @@ const MyUsers = () => {
   return (
     <div className="my-users">
       <div className="my-users-header">
-        <h2>Mis Usuarios Asignados</h2>
+        <h2>Mis Emprendedores Asignados</h2>
         <button onClick={loadUsers} className="btn-refresh">
           🔄 Actualizar
         </button>
@@ -80,13 +80,13 @@ const MyUsers = () => {
 
       {users.length === 0 ? (
         <div className="my-users-empty">
-          <p>No tienes usuarios asignados actualmente.</p>
+          <p>No tienes emprendedores asignados actualmente.</p>
         </div>
       ) : (
         <>
           <div className="my-users-stats">
             <div className="stat-card">
-              <h3>Total de Usuarios</h3>
+              <h3>Total de Emprendedores</h3>
               <p className="stat-value">{users.length}</p>
             </div>
           </div>
@@ -96,7 +96,7 @@ const MyUsers = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Usuario</th>
+                  <th>Emprendedor</th>
                   <th>Email</th>
                   <th>Rol</th>
                   <th>Fecha de Registro</th>
@@ -143,7 +143,7 @@ const MyUsers = () => {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Detalles del Usuario</h3>
+              <h3>Detalles del Emprendedor</h3>
               <button className="modal-close" onClick={closeModal}>
                 ✕
               </button>
@@ -154,7 +154,7 @@ const MyUsers = () => {
                 <p>{selectedUser.id}</p>
               </div>
               <div className="user-detail">
-                <label>Usuario:</label>
+                <label>Emprendedor:</label>
                 <p>{selectedUser.username}</p>
               </div>
               <div className="user-detail">
