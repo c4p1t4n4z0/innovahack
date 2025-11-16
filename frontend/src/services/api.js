@@ -105,6 +105,83 @@ export const mentorService = {
     const response = await api.get(`/mentor/my-users/${userId}?mentor_id=${mentorId}`);
     return response.data;
   },
+  
+  // Invitaciones (solo mentor)
+  getInvitations: async (mentorId, status = 'pending') => {
+    const response = await api.get(`/mentor/invitations?mentor_id=${mentorId}&status=${status}`);
+    return response.data;
+  },
+  respondInvitation: async (mentorId, invitationId, action) => {
+    const response = await api.post(`/mentor/invitations/${invitationId}/respond`, { mentor_id: mentorId, action });
+    return response.data;
+  },
+  // Conversaciones y lectura
+  getConversations: async (mentorId) => {
+    const response = await api.get(`/mentor/conversations?mentor_id=${mentorId}`);
+    return response.data;
+  },
+  markMessagesRead: async (mentorId, userId) => {
+    const response = await api.post(`/mentor/messages/read`, { mentor_id: mentorId, user_id: userId });
+    return response.data;
+  },
+  listMessages: async (mentorId, userId) => {
+    const response = await api.get(`/mentor/messages?mentor_id=${mentorId}&user_id=${userId}`);
+    return response.data;
+  },
+  sendMessage: async (mentorId, userId, content) => {
+    const response = await api.post(`/mentor/messages`, { mentor_id: mentorId, user_id: userId, content });
+    return response.data;
+  },
+};
+
+export const userService = {
+  // Perfil propio
+  getProfile: async (userId) => {
+    const response = await api.get(`/user/profile/${userId}`);
+    return response.data;
+  },
+  updateProfile: async (userId, data) => {
+    const response = await api.put(`/user/profile/${userId}`, data);
+    return response.data;
+  },
+  // Emprendimiento
+  updateBusiness: async (userId, { name, category, description }) => {
+    const response = await api.put(`/user/business/${userId}`, { name, category, description });
+    return response.data;
+  },
+  // Invitaciones a mentor
+  listMyInvitations: async (userId) => {
+    const response = await api.get(`/user/mentor-invitations/${userId}`);
+    return response.data;
+  },
+  requestMentor: async (userId, mentorId, message) => {
+    const response = await api.post(`/user/request-mentor`, { user_id: userId, mentor_id: mentorId, message });
+    return response.data;
+  },
+  // Mensajes con mi mentora
+  listMessages: async (userId) => {
+    const response = await api.get(`/user/messages/${userId}`);
+    return response.data;
+  },
+  sendMessage: async (userId, content) => {
+    const response = await api.post(`/user/messages`, { user_id: userId, content });
+    return response.data;
+  },
+  markMessagesRead: async (userId) => {
+    const response = await api.post(`/user/messages/read`, { user_id: userId });
+    return response.data;
+  },
+  getUnreadCount: async (userId) => {
+    const response = await api.get(`/user/messages/unread-count/${userId}`);
+    return response.data;
+  },
+};
+
+export const aiService = {
+  generateAIMentorProgram: async (params) => {
+    const response = await api.post('/ai/generate-mentor-program', params);
+    return response.data;
+  }
 };
 
 export default api;
