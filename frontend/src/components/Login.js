@@ -91,9 +91,8 @@ const Login = () => {
             // En producción, aquí guardarías el token JWT
             // localStorage.setItem('token', response.token);
             setTimeout(() => {
-              // Redirigir a página principal (temporalmente recarga)
-              // TODO: Crear componente Dashboard y redirigir ahí
-              window.location.reload();
+              // Redirigir al Dashboard
+              window.location.href = '/dashboard';
             }, 1000);
           }
         }
@@ -127,8 +126,9 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div className="login-wrapper">
+      <div className="login-container">
+        <div className="login-card">
         <h2>{isRegister ? 'Registro' : 'Iniciar Sesión'}</h2>
         
         {error && <div className="alert alert-error">{error}</div>}
@@ -203,6 +203,7 @@ const Login = () => {
               {isRegister ? 'Inicia sesión' : 'Regístrate'}
             </button>
           </p>
+        </div>
         </div>
       </div>
     </div>
