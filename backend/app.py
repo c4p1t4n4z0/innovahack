@@ -5,7 +5,8 @@ from routes.auth_routes import auth_bp
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-
+from dotenv import load_dotenv
+load_dotenv()
 # Obtener la ruta del directorio actual
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -76,6 +77,14 @@ app.register_blueprint(admin_bp, url_prefix='/api/admin')
 # Registrar rutas de mentores
 from routes.mentor_routes import mentor_bp
 app.register_blueprint(mentor_bp, url_prefix='/api/mentor')
+
+# Registrar rutas de usuario (perfil propio)
+from routes.user_routes import user_bp
+app.register_blueprint(user_bp, url_prefix='/api/user')
+
+# Registrar rutas de IA (Gemini)
+from routes.ai_routes import ai_bp
+app.register_blueprint(ai_bp, url_prefix='/api')
 
 @app.route('/')
 def index():
