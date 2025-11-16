@@ -10,6 +10,7 @@ import ProfileModal from './ProfileModal';
 import CreditSimulator from './CreditSimulator';
 import SimulationHistory from './SimulationHistory';
 import ViabilityHistory from './ViabilityHistory';
+import SalesManagement from './SalesManagement';
 import './Dashboard.css';
 import { userService } from '../services/api';
 
@@ -97,12 +98,22 @@ const Dashboard = () => {
       }
     };
     
+    const handleNavigateToSales = (event) => {
+      if (event.detail?.section === 'ventas') {
+        setTimeout(() => {
+          setActiveSection('ventas');
+        }, 100);
+      }
+    };
+    
     window.addEventListener('navigateToSimulator', handleNavigateToSimulator);
     window.addEventListener('navigateToViability', handleNavigateToViability);
+    window.addEventListener('navigateToSales', handleNavigateToSales);
     
     return () => {
       window.removeEventListener('navigateToSimulator', handleNavigateToSimulator);
       window.removeEventListener('navigateToViability', handleNavigateToViability);
+      window.removeEventListener('navigateToSales', handleNavigateToSales);
     };
   }, []);
 
@@ -119,6 +130,7 @@ const Dashboard = () => {
     ...(user.role === 'user' ? [{ id: 'simulador', label: '💳 Simulador de Crédito', component: CreditSimulator, adminOnly: false, mentorOnly: false }] : []),
     ...(user.role === 'user' ? [{ id: 'historial-simulaciones', label: '📜 Historial Simulaciones', component: SimulationHistory, adminOnly: false, mentorOnly: false }] : []),
     ...(user.role === 'user' ? [{ id: 'historial-viabilidad', label: '📊 Historial Viabilidad', component: ViabilityHistory, adminOnly: false, mentorOnly: false }] : []),
+    ...(user.role === 'user' ? [{ id: 'ventas', label: '📊 Gestión de Ventas', component: SalesManagement, adminOnly: false, mentorOnly: false }] : []),
     { id: 'dashboard', label: '📊 Dashboard', component: null, adminOnly: false, mentorOnly: false },
     // Puedes agregar más secciones aquí en el futuro
   ];

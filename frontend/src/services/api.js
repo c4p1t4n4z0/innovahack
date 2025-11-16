@@ -216,6 +216,50 @@ export const userService = {
   },
 };
 
+export const salesService = {
+  // Parámetros mensuales
+  getParameters: async (userId, monthYear = null) => {
+    const url = monthYear 
+      ? `/sales/parameters/${userId}?month_year=${monthYear}`
+      : `/sales/parameters/${userId}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+  
+  updateParameters: async (userId, parameters) => {
+    const response = await api.put(`/sales/parameters/${userId}`, parameters);
+    return response.data;
+  },
+  
+  // Ventas diarias
+  getSales: async (userId, monthYear = null) => {
+    const url = monthYear 
+      ? `/sales/sales/${userId}?month_year=${monthYear}`
+      : `/sales/sales/${userId}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+  
+  createSale: async (userId, sale) => {
+    const response = await api.post(`/sales/sales/${userId}`, sale);
+    return response.data;
+  },
+  
+  deleteSale: async (userId, saleId) => {
+    const response = await api.delete(`/sales/sales/${userId}/${saleId}`);
+    return response.data;
+  },
+  
+  // Reportes
+  getReport: async (userId, monthYear = null) => {
+    const url = monthYear 
+      ? `/sales/report/${userId}?month_year=${monthYear}`
+      : `/sales/report/${userId}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+};
+
 export const aiService = {
   generateAIMentorProgram: async (params) => {
     const response = await api.post('/ai/generate-mentor-program', params);

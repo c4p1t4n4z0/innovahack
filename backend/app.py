@@ -92,6 +92,10 @@ app.register_blueprint(user_bp, url_prefix='/api/user')
 from routes.ai_routes import ai_bp
 app.register_blueprint(ai_bp, url_prefix='/api')
 
+# Registrar rutas de ventas
+from routes.sales_routes import sales_bp
+app.register_blueprint(sales_bp, url_prefix='/api/sales')
+
 @app.route('/')
 def index():
     return {'message': 'API funcionando correctamente'}

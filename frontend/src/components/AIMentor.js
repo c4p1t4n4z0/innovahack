@@ -432,6 +432,49 @@ const AIMentor = () => {
                           >
                             💳 Calcular préstamo necesario
                           </button>
+                          <button
+                            onClick={() => {
+                              // Guardar datos para Gestión de Ventas
+                              const salesData = {
+                                pricePerUnit: parseFloat(viab.pricePerUnit || '0'),
+                                variableCostPerUnit: parseFloat(viab.variableCostPerUnit || '0'),
+                                fixedCosts: parseFloat(viab.fixedCosts || '0'),
+                                expectedMonthlySalesUnits: parseFloat(viab.expectedMonthlySalesUnits || '0'),
+                                loanMonthlyPayment: parseFloat(viab.monthlyLoanPayment || '0'),
+                                // Guardar flag para indicar que viene del análisis de viabilidad
+                                fromViability: true
+                              };
+                              
+                              console.log('Guardando datos para Gestión de Ventas:', salesData);
+                              
+                              // Guardar en localStorage
+                              localStorage.setItem('salesDataFromViability', JSON.stringify(salesData));
+                              
+                              // Disparar evento personalizado para navegar a Gestión de Ventas
+                              setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('navigateToSales', { 
+                                  detail: { section: 'ventas' } 
+                                }));
+                              }, 50);
+                              
+                              // Mostrar mensaje de éxito
+                              alert('✅ Datos del análisis de viabilidad guardados. Serán usados al agregar ventas en Gestión de Ventas.');
+                            }}
+                            style={{ 
+                              background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                              color: 'white',
+                              border: 'none',
+                              padding: '12px 24px',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              fontSize: '14px',
+                              marginLeft: '12px'
+                            }}
+                            title="Usar estos datos en Gestión de Ventas"
+                          >
+                            📊 Usar en Gestión de Ventas
+                          </button>
                           <small className="muted" style={{ fontSize: '12px' }}>
                             {viabResult.monthlyLoanPayment > 0 
                               ? `💡 Cuota del crédito cargada: ${viabResult.monthlyLoanPayment.toLocaleString()} BS/mes. El análisis ya considera esta cuota.`
